@@ -1,0 +1,129 @@
+---
+title: "Lab3"
+author: "Michelle Hernandez"
+format: html
+editor: visual
+---
+
+## Quarto
+
+1.  Read in the data
+
+```{r}
+download.file(
+  "https://raw.githubusercontent.com/USCbiostats/data-science-data/master/02_met/met_all.gz",
+  destfile = file.path("~", "Downloads", "met_all.gz"),
+  method   = "libcurl",
+  timeout  = 60
+)
+
+met <- data.table::fread(file.path("~", "Downloads", "met_all.gz"))
+
+```
+
+Question2
+
+```{r}
+dim(met)
+head(met)
+tail(met)
+
+
+```
+
+Question3
+
+```{r}
+str(met)
+```
+
+Question4
+
+```{r}
+table(met$year)
+table(met$day)
+table(met$hour)
+
+summary(met$temp)
+summary(met$elev)
+summary(met$wind.sp)
+
+met[met$elev==9999.0] <- NA
+summary(met$elev)
+
+met <- met[temp>-40]
+met2 <- met[order(temp)]
+head(met2)
+
+met[met$temp==-17.2,]
+# yoder colorado, prob doesnt get that cold so we should remove
+
+
+```
+
+Question5
+
+```{r}
+met <- met[temp>-15]
+met2 <- met[order(temp)]
+head(met2)
+summary(met$temp)
+# We removed any entries with a temp > -15, our lowest temp is now -3C which is resonable
+
+
+
+```
+
+Question6
+
+```{r}
+eleview <- met[elev==max(elev), ]
+summary(eleview)
+
+cor(eleview$temp, eleview$wind.sp, use="complete")
+cor(eleview$temp, eleview$hour, use="complete")
+cor(eleview$wind.sp, eleview$day, use="complete")
+cor(eleview$wind.sp, eleview$hour, use="complete")
+cor(eleview$temp, eleview$day, use="complete")
+```
+
+Question7
+
+```{r}
+hist(met$elev, breaks=100)
+hist(met$temp)
+hist(met$wind.sp, breaks=100)
+
+leaflet(eleview) %>%
+  addProviderTiles('OpenStreetMap') %>% 
+  addCircles(lat=~lat,lng=~lon, opacity=1, fillOpacity=1, radius=100)
+library(lubridate)
+eleview$date <- with(eleview, ymd_h(paste(year, month, day, hour, sep= ' ')))
+summary(eleview$date)
+
+eleview <- eleview[order(date)]
+head(eleview)
+
+plot(eleview$date, eleview$temp, type='l')
+
+plot(eleview$date, eleview$wind.sp, type='l')
+```
+
+Question8 - Further Analysis
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
